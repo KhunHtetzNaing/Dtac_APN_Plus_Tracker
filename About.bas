@@ -1,5 +1,5 @@
 ﻿Type=Activity
-Version=6
+Version=6.3
 ModulesStructureVersion=1
 B4A=true
 @EndOfDesignText@
@@ -11,7 +11,7 @@ B4A=true
 Sub Process_Globals
 	'These global variables will be declared once when the application starts.
 	'These variables can be accessed from all modules.
-
+Dim t2 As Timer
 End Sub
 
 Sub Globals
@@ -20,9 +20,26 @@ Sub Globals
 	Dim su As StringUtils 
 	Dim p As PhoneIntents 
 	Dim lstOne As ListView 
+	Dim AdView1 As AdView
+	Dim Interstitial As mwAdmobInterstitial
+	Dim ph As Phone
 End Sub
 
 Sub Activity_Create(FirstTime As Boolean)
+	If ph.SdkVersion > 19 Then
+	AdView1.Initialize("ad","ca-app-pub-4173348573252986/9479922950")
+	AdView1.LoadAd
+	Activity.AddView(AdView1,0%x,89%y,100%x,50dip)
+	If Activity.Width > Activity.Height Then
+		AdView1.RemoveView
+		Activity.AddView(AdView1,0%x,80%y,100%x,50dip)
+	End If
+	Interstitial.Initialize("interstitial","ca-app-pub-4173348573252986/9168412553")
+	Interstitial.LoadAd
+	t2.Initialize("t2",30000)
+	t2.Enabled = True
+	End If
+	
 	'Do not forget to load the layout file created with the visual designer. For example:
 	'Activity.LoadLayout("Layout1")
 	Activity.Title = "About"
@@ -90,3 +107,13 @@ Sub lstOnes_ItemClick (Position As Int, Value As Object)
 End Sub
 
 
+Sub t2_Tick
+	If ph.SdkVersion > 19 Then
+		If Interstitial.Status = Interstitial.Status_AdReadyToShow Then
+		Interstitial.Show
+	End If
+	If Interstitial.Status = Interstitial.Status_Dismissed Then
+		Interstitial.LoadAd
+	End If
+	End If
+End Sub

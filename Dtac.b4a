@@ -1,29 +1,27 @@
-﻿Version=6
+﻿Version=6.3
 NumberOfModules=2
-Module1=Starter
-Module2=About
+Module1=About
+Module2=Starter
 Build1=Default,com.htetznaing.dtacapntracker
 ManifestCode='This code will be applied to the manifest file during compilation.~\n~'You do not need to modify it in most cases.~\n~'See this link for for more information: http://www.b4x.com/forum/showthread.php?p=78136~\n~AddManifestText(~\n~<uses-sdk android:minSdkVersion="5" android:targetSdkVersion="19"/>~\n~<supports-screens android:largeScreens="true" ~\n~    android:normalScreens="true" ~\n~    android:smallScreens="true" ~\n~    android:anyDensity="true"/>)~\n~SetApplicationAttribute(android:icon, "@drawable/icon")~\n~SetApplicationAttribute(android:label, "$LABEL$")~\n~'End of default text.~\n~'AdMob~\n~AddApplicationText(~\n~<meta-data android:name="com.google.android.gms.version"~\n~  android:value="@integer/google_play_services_version"/>~\n~<activity android:name="com.google.android.gms.ads.AdActivity"~\n~  android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"/>~\n~)~\n~'End of AdMob~\n~
 IconFile=
 NumberOfFiles=1
 File1=logo.png
-NumberOfLibraries=7
+NumberOfLibraries=5
 Library1=core
 Library2=phone
 Library3=stringutils
 Library4=admob
-Library5=reflection
-Library6=cache
-Library7=mlfiles
+Library5=mwadmobinterstitial2 (2)
 @EndOfDesignText@
 #Region  Project Attributes 
 	#ApplicationLabel: Dtac APN + Tracker
-	#VersionCode: 1
-	#VersionName: 1.0
+	#VersionCode: 2
+	#VersionName: 1.1
 	'SupportedOrientations possible values: unspecified, landscape or portrait.
 	#SupportedOrientations: unspecified
 	#CanInstallToExternalStorage: False
-	#AdditionalRes: C:\Android\SDK\extras\google\google-play-services\libproject\google-play-services_lib\res, com.google.android.gms
+	#AdditionalRes: D:\Android\android-sdk\extras\google\google-play-services\libproject\google-play-services_lib\res, com.google.android.gms
 #End Region
 
 #Region  Activity Attributes 
@@ -34,14 +32,15 @@ Library7=mlfiles
 Sub Process_Globals
 	'These global variables will be declared once when the application starts.
 	'These variables can be accessed from all modules.
-
+Dim t1,t2 As Timer
 End Sub
 
 Sub Globals
 	Dim wv As WebView
 	Dim AdView1 As AdView
-	Dim ml As MLfiles
 	Dim ft As Label
+	Dim p As Phone
+	Dim Interstitial As mwAdmobInterstitial
 End Sub
 
 Sub Activity_Create(FirstTime As Boolean)
@@ -49,12 +48,25 @@ Sub Activity_Create(FirstTime As Boolean)
 	wv.LoadUrl("http://202.91.22.186/dms-scw-dtac_th/page/?wicket:bookmarkablePage=wicket-1:dk.mobilethink.cornerstone.wicket.base.SimpleModulePage&mtlocale=en")
 	Activity.AddView(wv,0%x,0%y,100%x,90%y)
 	
+	If p.SdkVersion > 19 Then
 	AdView1.Initialize("ad","ca-app-pub-4173348573252986/9479922950")
-	Activity.AddView(AdView1,0%x,90%y,100%x,10%y)
 	AdView1.LoadAd
-	Activity.AddMenuItem("Refresh","rf")
-	Activity.AddMenuItem("Clear","cl")
+	Activity.AddView(AdView1,0%x,89%y,100%x,50dip)
+	If Activity.Width > Activity.Height Then
+		AdView1.RemoveView
+		Activity.AddView(AdView1,0%x,80%y,100%x,50dip)
+	End If
+	Interstitial.Initialize("interstitial","ca-app-pub-4173348573252986/9168412553")
+	Interstitial.LoadAd
+	t1.Initialize("t1",100)
+	t1.Enabled = False
+	t2.Initialize("t2",30000)
+	t2.Enabled = True
+	End If
+	
+	Activity.AddMenuItem("Restart","rf")
 	Activity.AddMenuItem("About","ab")
+	Activity.AddMenuItem("Stop Ad Showing","sad")
 	
 	ft.Initialize("ft")
 	ft.Text = "Developed By Khun Htetz Naing"
@@ -63,26 +75,47 @@ Sub Activity_Create(FirstTime As Boolean)
 	Activity.AddView(ft,10dip, 100%y - 35dip , 100%x - 20dip ,40dip)
 End Sub
 
-Sub cl_Click
-	ml.RootCmd("pm clear b4a.example","",Null,Null,False)
-End Sub
 Sub rf_Click
 	Activity.Finish
-	StartActivity("Main")
+	StartActivity(Me)
+		If p.SdkVersion > 19 Then
+	t1.Enabled = True
+	End If
 End Sub
 
 Sub ab_Click
 	StartActivity(About)
+	If p.SdkVersion > 19 Then
+	t1.Enabled = True
+	End If
 End Sub
 
-Sub Ad_FailedToReceiveAd (ErrorCode As String)
-    Log("failed: " & ErrorCode)
+Sub sad_Click
+	t1.Enabled = False
+	t2.Enabled = False
 End Sub
-Sub Ad_ReceiveAd
-    Log("received")
+
+Sub t1_Tick
+	If p.SdkVersion > 19 Then
+	If Interstitial.Status = Interstitial.Status_AdReadyToShow Then
+		Interstitial.Show
+	End If
+	If Interstitial.Status = Interstitial.Status_Dismissed Then
+		Interstitial.LoadAd
+	End If
+	End If
+	t1.Enabled = False
 End Sub
-Sub Ad_AdScreenDismissed
-   Log("screen dismissed")
+
+Sub t2_Tick
+	If p.SdkVersion > 19 Then
+		If Interstitial.Status = Interstitial.Status_AdReadyToShow Then
+		Interstitial.Show
+	End If
+	If Interstitial.Status = Interstitial.Status_Dismissed Then
+		Interstitial.LoadAd
+	End If
+	End If
 End Sub
 
 Sub Activity_Resume
