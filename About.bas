@@ -1,5 +1,5 @@
 ﻿Type=Activity
-Version=6.3
+Version=6.5
 ModulesStructureVersion=1
 B4A=true
 @EndOfDesignText@
@@ -21,24 +21,19 @@ Sub Globals
 	Dim p As PhoneIntents 
 	Dim lstOne As ListView 
 	Dim AdView1 As AdView
-	Dim Interstitial As mwAdmobInterstitial
-	Dim ph As Phone
+	Dim Interstitial As InterstitialAd
 End Sub
 
 Sub Activity_Create(FirstTime As Boolean)
-	If ph.SdkVersion > 19 Then
-	AdView1.Initialize("ad","ca-app-pub-4173348573252986/9479922950")
+	AdView1.Initialize("ad","ca-app-pub-4173348573252986/7457565356")
 	AdView1.LoadAd
-	Activity.AddView(AdView1,0%x,89%y,100%x,50dip)
-	If Activity.Width > Activity.Height Then
-		AdView1.RemoveView
-		Activity.AddView(AdView1,0%x,80%y,100%x,50dip)
-	End If
-	Interstitial.Initialize("interstitial","ca-app-pub-4173348573252986/9168412553")
+	Activity.AddView(AdView1,0%x,100%y - 50dip,100%x,50dip)
+
+	Interstitial.Initialize("interstitial","ca-app-pub-4173348573252986/1411031750")
 	Interstitial.LoadAd
+	
 	t2.Initialize("t2",30000)
 	t2.Enabled = True
-	End If
 	
 	'Do not forget to load the layout file created with the visual designer. For example:
 	'Activity.LoadLayout("Layout1")
@@ -73,7 +68,7 @@ Sub Activity_Create(FirstTime As Boolean)
 	lstOne.SingleLineLayout .Label .Gravity = Gravity.CENTER 
 	lstOne.SingleLineLayout .ItemHeight = 40dip
 	lstOne.AddSingleLine2 ("Developed By : Khun Htetz Naing    ", 1)
-	lstOne.AddSingleLine2 ("Email : khunht3tzn4ing@gmail.com    ",2)
+	lstOne.AddSingleLine2 ("Website : www.HtetzNaing.com    ",2)
 	lstOne.AddSingleLine2 ("Facebook : www.facebook.com/Khun.Htetz.Naing   ", 3)
 	Activity.AddView ( lstOne, 30dip , 170dip , 100%x -  60dip, 122dip)
 	
@@ -101,19 +96,30 @@ End Sub
 
 Sub lstOnes_ItemClick (Position As Int, Value As Object)
      Select Value
-	 			Case 3
-				   StartActivity(p.OpenBrowser ("https://www.facebook.com/Khun.Htetz.Naing/"))
+	 	Case 2
+			Dim Facebook As Intent
+			Facebook.Initialize(Facebook.ACTION_VIEW, "http://www.htetznaing.com")
+			StartActivity(Facebook)
+		Case 3
+		Try
+ 
+			Dim Facebook As Intent
+ 
+			Facebook.Initialize(Facebook.ACTION_VIEW, "fb://page/627699334104477")
+			StartActivity(Facebook)
+ 
+		Catch
+ 
+			Dim i As Intent
+			i.Initialize(i.ACTION_VIEW, "https://m.facebook.com/MmFreeAndroidApps")
+ 
+			StartActivity(i)
+ 
+		End Try
 	 End Select
 End Sub
 
 
 Sub t2_Tick
-	If ph.SdkVersion > 19 Then
-		If Interstitial.Status = Interstitial.Status_AdReadyToShow Then
-		Interstitial.Show
-	End If
-	If Interstitial.Status = Interstitial.Status_Dismissed Then
-		Interstitial.LoadAd
-	End If
-	End If
+		If Interstitial.Ready Then Interstitial.Show Else Interstitial.LoadAd
 End Sub
